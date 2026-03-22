@@ -703,7 +703,7 @@ export default function App() {
         <div className="flex flex-col gap-4 rounded-3xl p-5 text-white shadow-lg print:rounded-none" style={{ backgroundColor: settings.theme.header }}>
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
-              {activeSheet.logo ? <img src={activeSheet.logo} alt="Club logo" className="h-16 w-16 rounded-2xl border bg-white object-contain p-2" /> : null}
+              {settings.defaultLogo ? <img src={settings.defaultLogo} alt="Club logo" className="h-16 w-16 rounded-2xl border bg-white object-contain p-2" /> : null}
               <div>
                 <h1 className="text-2xl font-bold">Grassroots Football Match Day Sheets</h1>
                 <p className="text-sm text-slate-200">Offline-friendly local app for multiple clubs, teams and coaches</p>
