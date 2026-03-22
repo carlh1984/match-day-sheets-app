@@ -1,9 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="100" fill="#0f172a"/>
-  <path d="M128 96h256v320H128z" fill="#f8fafc"/>
-  <rect x="192" y="64" width="128" height="64" rx="10" fill="#dc2626"/>
-  <circle cx="256" cy="256" r="60" fill="none" stroke="#0f172a" stroke-width="8"/>
-  <line x1="128" y1="256" x2="384" y2="256" stroke="#0f172a" stroke-width="8"/>
-  <path d="M256 196a60 60 0 0 1 0 120" fill="none" stroke="#0f172a" stroke-width="8"/>
-  <circle cx="256" cy="256" r="10" fill="#0f172a"/>
+  <circle cx="256" cy="256" r="250" fill="#ffffff" stroke="#0f172a" stroke-width="12"/>
+  <path d="M256 180 L310 220 L290 285 L222 285 L202 220 Z" fill="#0f172a" />
+  <path d="M256 180 L256 16" stroke="#0f172a" stroke-width="12" />
+  <path d="M310 220 L460 170" stroke="#0f172a" stroke-width="12" />
+  <path d="M290 285 L380 440" stroke="#0f172a" stroke-width="12" />
+  <path d="M222 285 L132 440" stroke="#0f172a" stroke-width="12" />
+  <path d="M202 220 L52 170" stroke="#0f172a" stroke-width="12" />
+  <path d="M256 16 A240 240 0 0 1 460 170" fill="none" stroke="#0f172a" stroke-width="12" />
+  <path d="M460 170 A240 240 0 0 1 380 440" fill="none" stroke="#0f172a" stroke-width="12" />
+  <path d="M380 440 A240 240 0 0 1 132 440" fill="none" stroke="#0f172a" stroke-width="12" />
+  <path d="M132 440 A240 240 0 0 1 52 170" fill="none" stroke="#0f172a" stroke-width="12" />
+  <path d="M52 170 A240 240 0 0 1 256 16" fill="none" stroke="#0f172a" stroke-width="12" />
 </svg>
