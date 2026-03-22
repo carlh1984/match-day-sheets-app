@@ -532,15 +532,75 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
-  const exportAllJson = () => {
-    const blob = new Blob([JSON.stringify(sheets, null, 2)], { type: "application/json" });
+  const exportAllHtml = () => {
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>All Match Sheets</title>
+        <style>
+          body { font-family: sans-serif; padding: 20px; background: #f8fafc; }
+          .sheet { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); page-break-after: always; }
+          h1 { color: #0f172a; border-bottom: 2px solid #0f172a; padding-bottom: 10px; }
+          .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; }
+          th { background: #f1f5f9; }
+          .notice { color: #dc2626; font-weight: bold; margin-top: 20px; font-size: 0.9em; }
+        </style>
+      </head>
+      <body>
+        ${sheets.map(sheet => `
+          <div class="sheet">
+            <h1>Match Day Sheet: ${sheet.teamName} vs ${sheet.oppositionTeam}</h1>
+            <div class="meta">
+              <div><strong>League:</strong> ${sheet.league}</div>
+              <div><strong>Date:</strong> ${sheet.date}</div>
+              <div><strong>Division/Cup:</strong> ${sheet.divisionOrCup}</div>
+              <div><strong>Ground:</strong> ${sheet.groundName}</div>
+              <div><strong>Referee:</strong> ${sheet.refereeName}</div>
+              <div><strong>Score:</strong> ${sheet.scoreFor} - ${sheet.scoreAgainst}</div>
+            </div>
+            <h2>Lineup</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Player Name</th>
+                  <th>ID Checked</th>
+                  <th>Goals</th>
+                  <th>YEL</th>
+                  <th>RED</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sheet.players.map(p => `
+                  <tr>
+                    <td>${p.shirtNumber}</td>
+                    <td>${p.playerName}</td>
+                    <td>${p.idChecked ? 'Yes' : 'No'}</td>
+                    <td>${p.goals}</td>
+                    <td>${p.yellow ? 'Y' : ''}</td>
+                    <td>${p.red ? 'R' : ''}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div class="notice">${NOTICE_TEXT}</div>
+          </div>
+        `).join('')}
+      </body>
+      </html>
+    `;
+    const blob = new Blob([htmlContent], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `all-match-sheets.json`;
+    a.download = `all-match-sheets.html`;
     a.click();
     URL.revokeObjectURL(url);
   };
+
 
   const printSheet = () => window.print();
   
@@ -612,7 +672,7 @@ export default function App() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Saved match sheets</CardTitle>
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={exportAllJson}><FileDown className="mr-2 h-4 w-4" />Export all</Button>
+                  <Button variant="outline" onClick={exportAllHtml}><FileDown className="mr-2 h-4 w-4" />Export all (HTML)</Button>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
