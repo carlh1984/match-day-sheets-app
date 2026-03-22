@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Trash2, Printer, Mail, MessageCircle, Upload, Copy, Settings, FileText, FileDown, Save } from "lucide-react";
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 // --- UI COMPONENTS ---
 const Button = ({ children, variant = "default", size = "default", className, ...props }) => {
@@ -638,9 +640,46 @@ export default function App() {
 
   const printSheet = () => window.print();
   
-  const emailSheet = (sheet) => {
+  const emailSheet = async (sheet) => {
+    // 1. Alert the user that a PDF is being generated
+    const confirmMsg = "I'm generating a PDF of your Match Sheet now. It will download automatically, and then I'll open your email app. All you'll need to do is click 'Attach' and pick the file that just appeared in your downloads!";
+    alert(confirmMsg);
+
+    // 2. Generate and Download PDF
+    const editorElement = document.getElementById('match-editor-content');
+    if (editorElement) {
+      // Temporarily hide elements not needed for PDF
+      const printHiddens = document.querySelectorAll('.print\\:hidden');
+      printHiddens.forEach(el => el.style.display = 'none');
+      
+      try {
+        const canvas = await html2canvas(editorElement, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          windowWidth: editorElement.scrollWidth,
+          windowHeight: editorElement.scrollHeight
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`${sheet.teamName}-vs-${sheet.oppositionTeam}-${sheet.date}.pdf`);
+      } catch (err) {
+        console.error("PDF generation failed:", err);
+      } finally {
+        // Restore hidden elements
+        printHiddens.forEach(el => el.style.display = '');
+      }
+    }
+
+    // 3. Open Email App
     const subject = encodeURIComponent(`Match Day Sheet - ${sheet.teamName} vs ${sheet.oppositionTeam}`);
-    const body = encodeURIComponent(`Match Day Sheet\n\nLeague: ${sheet.league}\nDate: ${sheet.date}\nTeam: ${sheet.teamName}\nOpposition: ${sheet.oppositionTeam}\nScore: ${sheet.scoreFor} - ${sheet.scoreAgainst}\n\nPlease attach the PDF or printed copy if needed.`);
+    const body = encodeURIComponent(`Match Day Sheet\n\nLeague: ${sheet.league}\nDate: ${sheet.date}\nTeam: ${sheet.teamName}\nOpposition: ${sheet.oppositionTeam}\nScore: ${sheet.scoreFor} - ${sheet.scoreAgainst}\n\nPlease attach the PDF match sheet that just downloaded.`);
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };
 
@@ -760,7 +799,7 @@ export default function App() {
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="editor" className="space-y-6">
+          <TabsContent value="editor" className="space-y-6" id="match-editor-content">
             <Card className="rounded-2xl shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Match details</CardTitle>
