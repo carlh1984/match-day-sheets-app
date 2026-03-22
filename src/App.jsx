@@ -735,13 +735,6 @@ export default function App() {
                   <Label>Penalties (Cup Game Only) - Opposition</Label>
                   <Input value={activeSheet.penaltiesAgainst} onChange={(e) => updateSheet({ penaltiesAgainst: e.target.value })} />
                 </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Sheet logo</Label>
-                  <div className="flex flex-wrap items-center gap-3 rounded-xl border p-3">
-                    <Input type="file" accept="image/*" className="max-w-sm" onChange={(e) => onLogoUpload(e.target.files?.[0], "sheet")} />
-                    <Button type="button" variant="outline" onClick={() => updateSheet({ logo: settings.defaultLogo || "" })}>Use default logo</Button>
-                  </div>
-                </div>
               </CardContent>
             </Card>
             <PlayerTable title="Team details" players={activeSheet.players} onChange={(players) => updateSheet({ players })} theme={settings.theme} squad={squad} />
