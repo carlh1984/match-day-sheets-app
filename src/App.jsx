@@ -718,8 +718,8 @@ export default function App() {
             </div>
             <div className="flex flex-wrap gap-2 print:hidden">
               {deferredPrompt && (
-                <Button onClick={installApp} className="bg-green-600 text-white border-green-700 hover:bg-green-700">
-                  Install App
+                <Button onClick={installApp} className="bg-green-600 text-white border-green-700 hover:bg-green-700 animate-pulse">
+                  <Upload className="mr-2 h-4 w-4" /> Install App
                 </Button>
               )}
               <Button onClick={newSheet} style={{ backgroundColor: settings.theme.button }} className="text-white"><Plus className="mr-2 h-4 w-4" />New sheet</Button>
@@ -1036,6 +1036,24 @@ export default function App() {
                 >
                   <Plus className="mr-2 h-4 w-4" /> Add Player to Squad
                 </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl shadow-sm">
+              <CardHeader>
+                <CardTitle>How to install on mobile</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm text-slate-700">
+                <div>
+                  <h3 className="font-bold text-slate-900 mb-1">iPhone (Safari)</h3>
+                  <p>1. Tap the <strong>Share</strong> button (the square with an arrow) at the bottom.</p>
+                  <p>2. Scroll down and tap <strong>'Add to Home Screen'</strong>.</p>
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 mb-1">Android (Chrome)</h3>
+                  <p>1. Look for the green <strong>'Install App'</strong> button at the top of this page.</p>
+                  <p>2. If it's not there, tap the <strong>three dots</strong> in the corner and select <strong>'Install app'</strong>.</p>
+                </div>
               </CardContent>
             </Card>
 
