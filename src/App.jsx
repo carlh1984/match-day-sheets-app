@@ -773,10 +773,7 @@ export default function App() {
               <CardContent className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>League</Label>
-                  <div className="flex gap-6 rounded-xl border p-3">
-                    <label className="flex items-center gap-2"><input type="radio" name="league" checked={activeSheet.league === "WJFL"} onChange={() => updateSheet({ league: "WJFL" })} /> WJFL</label>
-                    <label className="flex items-center gap-2"><input type="radio" name="league" checked={activeSheet.league === "WGFL"} onChange={() => updateSheet({ league: "WGFL" })} /> WGFL</label>
-                  </div>
+                  <Input value={activeSheet.league} onChange={(e) => updateSheet({ league: e.target.value })} placeholder="Enter league name (e.g. WJFL)" />
                 </div>
                 <div className="space-y-2">
                   <Label>Date</Label>
