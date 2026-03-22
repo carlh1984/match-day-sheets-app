@@ -735,7 +735,6 @@ export default function App() {
               <CardContent className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Team Manager Signature</Label>
                     <SignaturePad label="Team manager signature" value={activeSheet.managerSignature} onChange={(v) => updateSheet({ managerSignature: v })} />
                   </div>
                   <div className="space-y-2">
@@ -745,7 +744,6 @@ export default function App() {
                 </div>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Opposition Manager Signature</Label>
                     <SignaturePad label="Opposition manager signature" value={activeSheet.oppositionManagerSignature} onChange={(v) => updateSheet({ oppositionManagerSignature: v })} />
                   </div>
                   <div className="space-y-2">
