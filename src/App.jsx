@@ -309,6 +309,12 @@ function PlayerTable({ title, players, onChange, theme }) {
     if (players.length <= 3) return;
     onChange(players.filter((_, i) => i !== idx));
   };
+
+  const allChecked = players.every((p) => !!p.idChecked);
+  const toggleAll = (checked) => {
+    onChange(players.map((p) => ({ ...p, idChecked: checked })));
+  };
+
   return (
     <Card className="rounded-2xl shadow-sm">
       <CardHeader>
@@ -325,7 +331,12 @@ function PlayerTable({ title, players, onChange, theme }) {
             <tr className="bg-slate-100 text-left">
               <th className="border p-2">Shirt Number</th>
               <th className="border p-2">Player Name</th>
-              <th className="border p-2">ID Checked by Opposition</th>
+              <th className="border p-2">
+                <div className="flex items-center gap-2">
+                  <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
+                  <span>ID Checked by Opposition</span>
+                </div>
+              </th>
               <th className="border p-2">Goals</th>
               <th className="border p-2">Yellow</th>
               <th className="border p-2">Red</th>
