@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Trash2, Printer, Mail, MessageCircle, Upload, Copy, Settings, FileText, FileDown, Save } from "lucide-react";
+import * as XLSX from 'xlsx';
 
 // --- UI COMPONENTS ---
 const Button = ({ children, variant = "default", size = "default", className, ...props }) => {
@@ -522,14 +523,47 @@ export default function App() {
     alert("Sheet marked as complete.");
   };
 
-  const exportJson = (sheet) => {
-    const blob = new Blob([JSON.stringify(sheet, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${sheet.teamName || "team"}-${sheet.oppositionTeam || "sheet"}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const exportAllXlsx = () => {
+    const data = [];
+    sheets.forEach(sheet => {
+      // Add sheet header info
+      data.push({
+        'Match ID': sheet.id,
+        'Team': sheet.teamName,
+        'Opposition': sheet.oppositionTeam,
+        'League': sheet.league,
+        'Date': sheet.date,
+        'Score': `${sheet.scoreFor} - ${sheet.scoreAgainst}`,
+        'Type': 'MATCH_HEADER'
+      });
+      
+      // Add player details
+      sheet.players.forEach(p => {
+        data.push({
+          'Match ID': '',
+          'Team': sheet.teamName,
+          'Opposition': sheet.oppositionTeam,
+          'League': sheet.league,
+          'Date': sheet.date,
+          'Score': '',
+          'Type': 'PLAYER',
+          'Shirt #': p.shirtNumber,
+          'Player Name': p.playerName,
+          'ID Checked': p.idChecked ? 'Yes' : 'No',
+          'Goals': p.goals,
+          'Yellow': p.yellow ? '1' : '0',
+          'Red': p.red ? '1' : '0'
+        });
+      });
+      
+      // Blank row between sheets
+      data.push({});
+    });
+    
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Match Sheets");
+    XLSX.writeFile(wb, "match-day-sheets.xlsx");
   };
 
   const exportAllHtml = () => {
@@ -672,6 +706,7 @@ export default function App() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Saved match sheets</CardTitle>
                 <div className="flex gap-2">
+                  <Button variant="outline" onClick={exportAllXlsx}><FileDown className="mr-2 h-4 w-4" />Export all (Excel)</Button>
                   <Button variant="outline" onClick={exportAllHtml}><FileDown className="mr-2 h-4 w-4" />Export all (HTML)</Button>
                 </div>
               </CardHeader>
@@ -689,7 +724,6 @@ export default function App() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Button variant="outline" size="sm" onClick={() => { setActiveId(sheet.id); setTab("editor"); }}><FileText className="mr-2 h-4 w-4" />Open</Button>
-                      <Button variant="outline" size="sm" onClick={() => exportJson(sheet)}><FileDown className="mr-2 h-4 w-4" />Export</Button>
                       <Button variant="outline" size="sm" onClick={() => emailSheet(sheet)}><Mail className="mr-2 h-4 w-4" />Email</Button>
                       <Button variant="outline" size="sm" onClick={() => whatsappSheet(sheet)}><MessageCircle className="mr-2 h-4 w-4" />WhatsApp</Button>
                       <Button variant="outline" size="sm" onClick={() => deleteSheet(sheet.id)}><Trash2 className="mr-2 h-4 w-4" />Delete</Button>
@@ -704,7 +738,6 @@ export default function App() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Match details</CardTitle>
                 <div className="flex flex-wrap gap-2 print:hidden">
-                  <Button variant="outline" onClick={() => exportJson(activeSheet)}><FileDown className="mr-2 h-4 w-4" />Save file</Button>
                   <Button variant="outline" onClick={printSheet}><Printer className="mr-2 h-4 w-4" />Print / PDF</Button>
                   <Button variant="outline" onClick={() => emailSheet(activeSheet)}><Mail className="mr-2 h-4 w-4" />Email</Button>
                   <Button variant="outline" onClick={() => whatsappSheet(activeSheet)}><MessageCircle className="mr-2 h-4 w-4" />WhatsApp</Button>
