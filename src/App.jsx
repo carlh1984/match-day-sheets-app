@@ -663,6 +663,33 @@ export default function App() {
     reader.readAsDataURL(file);
   };
 
+  const exportSquadJson = () => {
+    const blob = new Blob([JSON.stringify(squad, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `my-squad-backup.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importSquadJson = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target.result);
+        if (Array.isArray(imported)) {
+          setSquad(imported);
+          alert("Squad imported successfully!");
+        }
+      } catch (err) {
+        alert("Error importing squad. Please make sure it's a valid backup file.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
   if (!activeSheet) return <div className="p-4">Loading sheet...</div>;
 
   const themeVars = {
@@ -925,11 +952,31 @@ export default function App() {
 
             <Card className="rounded-2xl shadow-sm">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Plus className="h-5 w-5" />
-                  My Squad (Defaults)
-                </CardTitle>
-                <p className="text-sm text-slate-500">Enter your regular team players here. Use the "Import Squad" button on a match sheet to fill them in instantly.</p>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Plus className="h-5 w-5" />
+                      My Squad (Defaults)
+                    </CardTitle>
+                    <p className="text-sm text-slate-500">Enter your regular team players here. Use the "Import Squad" button on a match sheet to fill them in instantly.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" onClick={exportSquadJson}>
+                      <FileDown className="mr-2 h-4 w-4" /> Export Squad File
+                    </Button>
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept=".json"
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                        onChange={(e) => importSquadJson(e.target.files?.[0])}
+                      />
+                      <Button variant="outline" size="sm">
+                        <Upload className="mr-2 h-4 w-4" /> Import Squad File
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="overflow-x-auto">
