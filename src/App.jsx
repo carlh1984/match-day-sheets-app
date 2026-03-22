@@ -640,51 +640,15 @@ export default function App() {
 
   const printSheet = () => window.print();
   
-  const emailSheet = async (sheet) => {
-    const editorElement = document.getElementById('match-editor-content');
-    if (!editorElement) {
-      alert("Could not find the match sheet content to generate the PDF.");
-      return;
-    }
-
-    // 1. Inform the user and start PDF generation
-    alert("I'm generating the PDF now. It will download automatically, and then I'll open your email client. Please attach the file that appears in your downloads!");
-
-    // 2. Temporarily hide non-printable elements
-    const printHiddens = document.querySelectorAll('.print\\:hidden');
-    printHiddens.forEach(el => el.style.display = 'none');
+  const emailSheet = (sheet) => {
+    // 1. Open Email App
+    const subject = encodeURIComponent(`Match Day Sheet - ${sheet.teamName} vs ${sheet.oppositionTeam}`);
+    const body = encodeURIComponent(`Match Day Sheet\n\nLeague: ${sheet.league}\nDate: ${sheet.date}\nTeam: ${sheet.teamName}\nOpposition: ${sheet.oppositionTeam}\nScore: ${sheet.scoreFor} - ${sheet.scoreAgainst}\n\nPlease attach the PDF match sheet (you can generate this by clicking 'Print / PDF' on the website and choosing 'Save as PDF').`);
     
-    try {
-      const canvas = await html2canvas(editorElement, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`${sheet.teamName}-vs-${sheet.oppositionTeam}-${sheet.date}.pdf`);
-      
-      // 3. Brief delay to ensure download starts before email client opens
-      setTimeout(() => {
-        const subject = encodeURIComponent(`Match Day Sheet - ${sheet.teamName} vs ${sheet.oppositionTeam}`);
-        const body = encodeURIComponent(`Match Day Sheet\n\nLeague: ${sheet.league}\nDate: ${sheet.date}\nTeam: ${sheet.teamName}\nOpposition: ${sheet.oppositionTeam}\nScore: ${sheet.scoreFor} - ${sheet.scoreAgainst}\n\nPlease find the PDF match sheet attached.`);
-        window.location.href = `mailto:?subject=${subject}&body=${body}`;
-      }, 1000);
-      
-    } catch (err) {
-      console.error("PDF generation failed:", err);
-      alert("Something went wrong with the PDF generation. You can still use the 'Print / PDF' button above!");
-    } finally {
-      // 4. Restore hidden elements
-      printHiddens.forEach(el => el.style.display = '');
-    }
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    
+    // 2. Alert the user with instructions
+    alert("I've opened your email app with the match details filled in. To include the full sheet, click the 'Print / PDF' button on the app, choose 'Save as PDF', and then attach that file to your email!");
   };
 
   const whatsappSheet = (sheet) => {
