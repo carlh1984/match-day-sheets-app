@@ -86,6 +86,7 @@ const TabsContent = ({ value, children, className }) => {
 const STORAGE_KEYS = {
   settings: "gmds_settings_v1",
   sheets: "gmds_sheets_v1",
+  squad: "gmds_squad_v1",
 };
 
 const NOTICE_TEXT = "After match please complete the Fulltime Scores via Fulltime or Match day App. The league reserves the right to request match cards for audit purposes at any time. Do not report half-time scores. Match officials are paid prior to the fixture commencing.";
@@ -119,6 +120,9 @@ const defaultSettings = {
   defaultLogo: "",
   theme: defaultTheme,
 };
+
+const defaultSquad = buildPlayers(11).map(p => ({ id: p.id, shirtNumber: p.shirtNumber, playerName: "" }));
+
 
 const createNewSheet = (settings) => ({
   id: createId(),
@@ -298,7 +302,7 @@ function SignaturePad({ value, onChange, label }) {
   );
 }
 
-function PlayerTable({ title, players, onChange, theme }) {
+function PlayerTable({ title, players, onChange, theme, squad }) {
   const updatePlayer = (idx, key, value) => {
     const next = [...players];
     next[idx] = { ...next[idx], [key]: value };
@@ -315,11 +319,32 @@ function PlayerTable({ title, players, onChange, theme }) {
     onChange(players.map((p) => ({ ...p, idChecked: checked })));
   };
 
+  const importSquad = () => {
+    if (!squad || !squad.length) return;
+    const imported = squad
+      .filter(sp => sp.playerName.trim() !== "")
+      .map((sp, idx) => ({
+        ...blankPlayer(idx),
+        shirtNumber: sp.shirtNumber,
+        playerName: sp.playerName
+      }));
+    if (imported.length > 0) {
+      onChange(imported);
+    }
+  };
+
   return (
     <Card className="rounded-2xl shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>{title}</span>
+          <div className="flex items-center gap-4">
+            <span>{title}</span>
+            {squad && squad.some(p => p.playerName.trim() !== "") && (
+              <Button type="button" size="sm" variant="outline" onClick={importSquad}>
+                Import Squad
+              </Button>
+            )}
+          </div>
           <Button type="button" size="sm" onClick={addPlayer} style={{ backgroundColor: theme.button }} className="text-white">
             <Plus className="mr-2 h-4 w-4" />Add player
           </Button>
@@ -374,6 +399,7 @@ function PlayerTable({ title, players, onChange, theme }) {
 export default function App() {
   const [settings, setSettings] = useState(defaultSettings);
   const [sheets, setSheets] = useState([]);
+  const [squad, setSquad] = useState([]);
   const [activeId, setActiveId] = useState("");
   const [tab, setTab] = useState("editor");
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -398,10 +424,15 @@ export default function App() {
     const savedSettings = loadJson(STORAGE_KEYS.settings, defaultSettings);
     const mergedSettings = { ...defaultSettings, ...savedSettings, theme: { ...defaultTheme, ...(savedSettings.theme || {}) } };
     const savedSheets = loadJson(STORAGE_KEYS.sheets, []);
+    const savedSquad = loadJson(STORAGE_KEYS.squad, defaultSquad);
+    
     const normalizedSheets = Array.isArray(savedSheets)
       ? savedSheets.map((sheet) => normalizeSheet(sheet, mergedSettings))
       : [];
+    
     setSettings(mergedSettings);
+    setSquad(savedSquad);
+
     if (normalizedSheets.length) {
       setSheets(normalizedSheets);
       setActiveId(normalizedSheets[0].id);
@@ -419,6 +450,11 @@ export default function App() {
   useEffect(() => {
     if (sheets.length) saveJson(STORAGE_KEYS.sheets, sheets);
   }, [sheets]);
+
+  useEffect(() => {
+    saveJson(STORAGE_KEYS.squad, squad);
+  }, [squad]);
+
 
   const activeSheet = useMemo(() => {
     if (!sheets.length) return null;
@@ -708,7 +744,7 @@ export default function App() {
                 </div>
               </CardContent>
             </Card>
-            <PlayerTable title="Team details" players={activeSheet.players} onChange={(players) => updateSheet({ players })} theme={settings.theme} />
+            <PlayerTable title="Team details" players={activeSheet.players} onChange={(players) => updateSheet({ players })} theme={settings.theme} squad={squad} />
             <Card className="rounded-2xl shadow-sm">
               <CardHeader>
                 <CardTitle>Referee section</CardTitle>
@@ -800,6 +836,72 @@ export default function App() {
                 </div>
               </CardContent>
             </Card>
+
+            <Card className="rounded-2xl shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Plus className="h-5 w-5" />
+                  My Squad (Defaults)
+                </CardTitle>
+                <p className="text-sm text-slate-500">Enter your regular team players here. Use the "Import Squad" button on a match sheet to fill them in instantly.</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-sm">
+                    <thead>
+                      <tr className="bg-slate-100 text-left">
+                        <th className="border p-2 w-24">Shirt #</th>
+                        <th className="border p-2">Player Name</th>
+                        <th className="border p-2 w-20">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {squad.map((player, idx) => (
+                        <tr key={player.id}>
+                          <td className="border p-2">
+                            <Input
+                              value={player.shirtNumber}
+                              onChange={(e) => {
+                                const next = [...squad];
+                                next[idx].shirtNumber = e.target.value;
+                                setSquad(next);
+                              }}
+                            />
+                          </td>
+                          <td className="border p-2">
+                            <Input
+                              value={player.playerName}
+                              onChange={(e) => {
+                                const next = [...squad];
+                                next[idx].playerName = e.target.value;
+                                setSquad(next);
+                              }}
+                            />
+                          </td>
+                          <td className="border p-2 text-center">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSquad(squad.filter((_, i) => i !== idx))}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <Button
+                  onClick={() => setSquad([...squad, { id: createId(), shirtNumber: "", playerName: "" }])}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Plus className="mr-2 h-4 w-4" /> Add Player to Squad
+                </Button>
+              </CardContent>
+            </Card>
+
             <Card className="rounded-2xl shadow-sm">
               <CardHeader>
                 <CardTitle>How this version works</CardTitle>
